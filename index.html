@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SummAI - Business Summarization</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        
+        h1 {
+            color: #667eea;
+            text-align: center;
+            margin-bottom: 10px;
+            font-size: 2.5em;
+        }
+        
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+        }
+        
+        .input-section {
+            margin-bottom: 30px;
+        }
+        
+        label {
+            display: block;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 10px;
+        }
+        
+        textarea {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            font-size: 16px;
+            font-family: inherit;
+            resize: vertical;
+            min-height: 200px;
+        }
+        
+        textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .controls {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .control-group {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        select, input[type="number"] {
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            font-size: 16px;
+            font-family: inherit;
+        }
+        
+        select:focus, input[type="number"]:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 40px;
+            border: none;
+            border-radius: 10px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.2s;
+            width: 100%;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.4);
+        }
+        
+        .btn:active {
+            transform: translateY(0);
+        }
+        
+        .btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .results {
+            margin-top: 40px;
+            display: none;
+        }
+        
+        .result-card {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 20px;
+            border-left: 5px solid #667eea;
+        }
+        
+        .result-card.abstractive {
+            border-left-color: #764ba2;
+        }
+        
+        .result-title {
+            font-size: 1.3em;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .badge {
+            display: inline-block;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.7em;
+            margin-left: 10px;
+            color: white;
+        }
+        
+        .badge.extractive {
+            background: #667eea;
+        }
+        
+        .badge.abstractive {
+            background: #764ba2;
+        }
+        
+        .result-text {
+            color: #555;
+            line-height: 1.8;
+            font-size: 16px;
+        }
+        
+        .loading {
+            text-align: center;
+            display: none;
+            margin-top: 20px;
+        }
+        
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .error {
+            background: #fee;
+            color: #c33;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 20px;
+            display: none;
+        }
+        
+        .info-box {
+            background: #e7f3ff;
+            border-left: 4px solid #2196F3;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+        }
+        
+        @media (max-width: 768px) {
+            .controls {
+                grid-template-columns: 1fr;
+            }
+            
+            .container {
+                padding: 20px;
+            }
+            
+            h1 {
+                font-size: 2em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🤖 SummAI</h1>
+        <p class="subtitle">AI-Powered Business Summarization Tool</p>
+        
+        <div class="info-box">
+            <strong>How it works:</strong> Paste your business article, report, or email below. Choose between extractive (selects key sentences) or abstractive (generates new summary) methods, or compare both!
+        </div>
+        
+        <div class="input-section">
+            <label for="textInput">Enter your text to summarize:</label>
+            <textarea id="textInput" placeholder="Paste your business article, report, or email here..."></textarea>
+        </div>
+        
+        <div class="controls">
+            <div class="control-group">
+                <label for="method">Summarization Method:</label>
+                <select id="method">
+                    <option value="both">Compare Both Methods</option>
+                    <option value="extractive">Extractive (TextRank)</option>
+                    <option value="abstractive">Abstractive (BART)</option>
+                </select>
+            </div>
+            
+            <div class="control-group">
+                <label for="numSentences">Number of Sentences (Extractive):</label>
+                <input type="number" id="numSentences" min="1" max="10" value="3">
+            </div>
+        </div>
+        
+        <button class="btn" onclick="summarize()">Generate Summary</button>
+        
+        <div class="loading">
+            <div class="spinner"></div>
+            <p style="margin-top: 15px; color: #667eea;">Generating summary...</p>
+        </div>
+        
+        <div class="error" id="error"></div>
+        
+        <div class="results" id="results">
+            <h2 style="color: #333; margin-bottom: 20px;">📊 Results</h2>
+            
+            <div id="extractiveResult" style="display: none;">
+                <div class="result-card extractive">
+                    <div class="result-title">
+                        Extractive Summary
+                        <span class="badge extractive">TextRank</span>
+                    </div>
+                    <div class="result-text" id="extractiveText"></div>
+                </div>
+            </div>
+            
+            <div id="abstractiveResult" style="display: none;">
+                <div class="result-card abstractive">
+                    <div class="result-title">
+                        Abstractive Summary
+                        <span class="badge abstractive">BART</span>
+                    </div>
+                    <div class="result-text" id="abstractiveText"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        async function summarize() {
+            const text = document.getElementById('textInput').value.trim();
+            const method = document.getElementById('method').value;
+            const numSentences = document.getElementById('numSentences').value;
+            
+            const errorDiv = document.getElementById('error');
+            const resultsDiv = document.getElementById('results');
+            const loadingDiv = document.querySelector('.loading');
+            const btn = document.querySelector('.btn');
+            
+            errorDiv.style.display = 'none';
+            resultsDiv.style.display = 'none';
+            
+            if (!text) {
+                errorDiv.textContent = 'Please enter some text to summarize.';
+                errorDiv.style.display = 'block';
+                return;
+            }
+            
+            btn.disabled = true;
+            loadingDiv.style.display = 'block';
+            
+            try {
+                const response = await fetch('/summarize', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        text: text,
+                        method: method,
+                        num_sentences: numSentences
+                    })
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Summarization failed');
+                }
+                
+                const data = await response.json();
+                
+                // Display results
+                resultsDiv.style.display = 'block';
+                
+                if (data.extractive) {
+                    document.getElementById('extractiveResult').style.display = 'block';
+                    document.getElementById('extractiveText').textContent = data.extractive;
+                } else {
+                    document.getElementById('extractiveResult').style.display = 'none';
+                }
+                
+                if (data.abstractive) {
+                    document.getElementById('abstractiveResult').style.display = 'block';
+                    document.getElementById('abstractiveText').textContent = data.abstractive;
+                } else {
+                    document.getElementById('abstractiveResult').style.display = 'none';
+                }
+                
+                // Scroll to results
+                resultsDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                
+            } catch (error) {
+                errorDiv.textContent = 'Error: ' + error.message;
+                errorDiv.style.display = 'block';
+            } finally {
+                btn.disabled = false;
+                loadingDiv.style.display = 'none';
+            }
+        }
+        
+        // Allow Enter key to submit (with Shift+Enter for new line)
+        document.getElementById('textInput').addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' && e.ctrlKey) {
+                summarize();
+            }
+        });
+    </script>
+</body>
+</html>
